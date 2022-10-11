@@ -1,0 +1,108 @@
+previousVariableValues := make([]float64, size)
+
+	// метод Зейделя
+	for {
+		currentVariableValues := make([]float64, size)
+		k++
+		// Посчитаем значения неизвестных на текущей итерации
+		// в соответствии с теоретическими формулами
+		for i := 0; i < size-1; i++ {
+			// Инициализируем i-ую неизвестную значением
+			// свободного члена i-ой строки матрицы
+			currentVariableValues[i] -= copyA.At(i, size)
+			// Вычитаем сумму по всем отличным от i-ой неизвестным
+			for j := 0; j < size; j++ {
+				// При j < i можем использовать уже посчитанные
+				// на этой итерации значения неизвестных
+				if j < i {
+					currentVariableValues[i] -= copyA.At(i, j) * currentVariableValues[j]
+				}
+				// При j > i используем значения с прошлой итерации
+				if j > i {
+					currentVariableValues[i] -= copyA.At(i, j) * previousVariableValues[j]
+				}
+			}
+			// Делим на коэффициент при i-ой неизвестной
+			currentVariableValues[i] /= A.At(i, i)
+		}
+
+		// Посчитаем текущую погрешность относительно предыдущей итерации
+		errorAccuracy := 0.0
+		for i := 0; i < size; i++ {
+			errorAccuracy += math.Abs(currentVariableValues[i] - previousVariableValues[i])
+		}
+		if errorAccuracy < eps {
+			break
+		}
+		// Переходим к следующей итерации, так
+		// что текущие значения неизвестных
+		// становятся значениями на предыдущей итерации
+		previousVariableValues = currentVariableValues
+
+	}
+	printResult(previousVariableValues, k, eps)
+
+
+
+
+	accuracys := [6]float64{0.001, 0.0001, 0.00001, 0.000001, 0.0000001, 0.00000001}
+    	mat, _ := matrix.Build(
+    		matrix.Builder{
+    			matrix.Row{8, 11, -1, -0.07, 0.654},
+    			matrix.Row{4.056, 0.3, -5.3, 0.11, -24.016},
+    			matrix.Row{0.2, 5.77, 2.8, -15, 54.567},
+    			matrix.Row{12, -3.8, 1, 3, -64.78},
+    		})
+
+    	A, _ := matrix.Build(matrix.Builder{
+    		matrix.Row{8, 11, -1, -0.07},
+    		matrix.Row{4.056, 0.3, -5.3, 0.11},
+    		matrix.Row{0.2, 5.77, 2.8, -15},
+    		matrix.Row{12, -3.8, 1, 3},
+    	})
+
+    	sizeRash := mat.Cols()
+    	size := A.Cols()
+
+    	if !mat.Valid() {
+    		err := errors.New("ошибка кол-во строк и кол-во столбцов не совпадает")
+    		if err != nil {
+    			panic(err)
+    		}
+    	}
+    	vec := []float64{0.654, -24.016, 54.567, -64.78}
+
+    	for i := 0; i < 6; i++ {
+    		Method.Seidel(mat, sizeRash, accuracys[i])
+    	}
+    	Method.Unit(A, vec, size)
+
+
+
+    		//temp := Normal.ThirdNormal(A, size, size)
+        	//if temp < 1 {
+        	//	sum := 0.0
+        	//	k := 0
+        	//
+        	//	// метод Зейделя
+        	//	for {
+        	//		k++
+        	//		for i := 0; i < size; i++ {
+        	//			// Предыдущие знчение x(k)i
+        	//			prevX := B[i]
+        	//			for j := 0; j < size; j++ {
+        	//				prevX += copyA.At(i, j) * resultMatrix[j]
+        	//			}
+        	//			sum += (resultMatrix[i] - prevX) * (resultMatrix[i] - prevX)
+        	//			resultMatrix[i] = prevX
+        	//		}
+        	//		if math.Sqrt(sum) < eps*(1-Normal.ThirdNormal(copyA, size, size)/Normal.ThirdNormal(copyA, size, size)) {
+        	//			break
+        	//		}
+        	//	}
+        	//	printResult(resultMatrix, k, eps)
+        	//} else {
+        	//	println("условие сходимости по евклидовой метрике не выполняется, попытка преобразования в матрицу с диогональным преобладанием\n")
+        	//	copyA, resultMatrix = Matrix.GestationToTheNormal(copyA, resultMatrix, size)
+        	//	Seidel(copyA, resultMatrix, size, eps)
+        	//}
